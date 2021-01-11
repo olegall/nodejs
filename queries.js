@@ -6,6 +6,9 @@ const pool = new Pool({
   password: 'slidersm44',
   port: 5432
 })
+const HTTP_status = {
+	ok: 200
+}
 
 async function getAdUnits(request, response) {
     //console.log(request.params.data);
@@ -20,7 +23,7 @@ async function getAdUnits(request, response) {
 		if (request.headers.origin){
 			response.setHeader('Access-Control-Allow-Origin', request.headers.origin);
 		}
-		response.status(200).json(results.rows)
+		response.status(HTTP_status.ok).json(results.rows)
     })
 }
 
@@ -31,14 +34,13 @@ async function createUpdateSite(request, response) {
     let data = JSON.parse(request.params.data);
 	let createdAt = `'${data.created_at}'`;
 	let updatedAt = `'${data.updated_at}'`;
-	let domain_ = `'${data.domain}'`;
-	let query = `INSERT INTO site VALUES (${domain_}, ${data.active}, ${createdAt}, ${updatedAt}, null)
-				 ON CONFLICT (domain) DO UPDATE SET 
-												domain = ${domain_}, 
-												active=${data.active}, 
-												created_at = ${createdAt}, 
-												updated_at = ${updatedAt}, 
-												deleted_at = null`;
+	let domainVal = `'${data.domain}'`;
+	let query = `INSERT INTO site VALUES (${domainVal}, ${data.active}, ${createdAt}, ${updatedAt}, null)
+				 ON CONFLICT (domain) DO UPDATE SET domain = ${domainVal}, 
+													active=${data.active}, 
+													created_at = ${createdAt}, 
+													updated_at = ${updatedAt}, 
+													deleted_at = null`;
     //console.log('***** query *****', query);
 	await pool.query(query, (error, results) => {
 		if (error) {
@@ -48,7 +50,7 @@ async function createUpdateSite(request, response) {
 			response.setHeader('Access-Control-Allow-Origin', request.headers.origin);
 		}
 		//let result = {"success": true, }
-		response.status(200).json(results.rows)
+		response.status(HTTP_status.ok).json(results.rows)
 	})
 }
 
@@ -59,27 +61,25 @@ async function createUpdateAdUnit(request, response) {
 	let data = JSON.parse(request.params.data);
 	let createdAt = `'${data.created_at}'`;
 	let updatedAt = `'${data.updated_at}'`;
-	let domain = `'${data.domain}'`;
 	let name = `'${data.name}'`;
-	let code = `'${data.code}'`;
+	let codeVal = `'${data.code}'`;
 	let params = `'${JSON.stringify(data.params)}'`;
 	let sizes = `'${JSON.stringify(data.sizes)}'`;
-	let query = `INSERT INTO ad_unit VALUES	(${data.id}, 
-											${data.user_id}, 
+	let query = `INSERT INTO ad_unit (user_id, site_id, name, code, active, params, sizes, created_at, updated_at, deleted_at) 
+									VALUES	(${data.user_id}, 
 											${data.site_id}, 
 											${name}, 
-											${code}, 
+											${codeVal}, 
 											${data.active}, 
 											${params}, 
 											${sizes}, 
 											${createdAt}, 
 											${updatedAt}, 
 											null)
-			    ON CONFLICT (id) DO UPDATE SET  id = ${data.id}, 
-												user_id = ${data.user_id}, 
+			    ON CONFLICT (code) DO UPDATE SET user_id = ${data.user_id}, 
 												site_id = ${data.site_id}, 
 												name = ${name}, 
-												code = ${code}, 
+												code = ${codeVal}, 
 												active = ${data.active}, 
 												params = ${params}, 
 												sizes = ${sizes}, 
@@ -89,12 +89,12 @@ async function createUpdateAdUnit(request, response) {
 	//console.log('***** query *****', query);
 	await pool.query(query, (error, results) => {
 		if (error) {
-		  throw error
+			throw error
 		}
 		if (request.headers.origin){
 			response.setHeader('Access-Control-Allow-Origin', request.headers.origin);
 		}
-		response.status(200).json(results.rows)
+		response.status(HTTP_status.ok).json(results.rows)
 	})
 }
 
