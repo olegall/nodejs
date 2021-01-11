@@ -7,15 +7,16 @@ const port = 3000
 
 app.use(bodyParser.json())
 app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
+	bodyParser.urlencoded({
+		extended: true,
+	})
 )
 app.get('/', (request, response) => {
-  response.json({ info: 'Node.js, Express, and Postgres API' })
+	response.json({ info: 'Node.js, Express, and Postgres API' })
 })
-app.get('/ad_units/:data', db.getAdUnits)
-app.put('/site/:data', db.createSite)
+app.get('/ad_unit/:data', db.getAdUnits)
+app.put('/ad_unit/:data', db.createUpdateAdUnit)
+app.put('/site/:data', db.createUpdateSite)
 app.listen(port, () => {
-  console.log(`App running on port ${port}.`)
+	console.log(`App running on port ${port}.`)
 })
