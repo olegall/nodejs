@@ -1,0 +1,11 @@
+----- установка -----
+https://nodejs.org/download/release/v13.14.0/
+https://blog.logrocket.com/nodejs-expressjs-postgresql-crud-rest-api-example/
+
+
+https://itvdn.com/ru/blog/article/aspnet-vs-nodejs
+
+
+----- Команды -----
+node D:\Работа\NodeJS\app.js
+перезапустить app.js - ctrl+c на окне
