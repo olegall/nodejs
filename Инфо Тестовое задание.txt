@@ -1,0 +1,136 @@
+Тестовое задание
+================
+
+Необходимо создать API на nodejs не ниже 12 версии.
+Для приложения использовать:
+- framework express или fastify;
+- СУБД postgresql.
+
+Обработка запросов CORS обязательно.
+Использование async/await обязательно.
+
+Все входящие запросы и исходящие ответы только в формате JSON.
+
+## Структура данных
+
+### Пользователь (users)
+id: int
+username: string
+email: string
+active: boolean
+created_at: timestamp
+updated_at: timestamp
+deleted_at: timestamp
+
+### Сайт (site)
+id: int
+domain: string
+active: boolean
+created_at: timestamp
+updated_at: timestamp
+deleted_at: timestamp
+
+### Рекламное место (ad-unit)
+Подразумеваем, что тип рекламного места только banner.
+
+id: int
+user_id: int
+site_id: int
+name: string
+code: string
+active: boolean
+params: json
+sizes: json
+created_at: timestamp
+updated_at: timestamp
+deleted_at: timestamp
+
+### Список методов
+
+Общая схема ответа для всех методов:
+```
+{
+	"success": true, // успешна или не успешна операция
+	"data": [], // ответ от запрашиваемого метода API, ответ может содержать как массив ответов так объект ответа
+	"errors": [] // массив ошибок при выполении операции
+}
+```
+
+## Сохранить сайт
+Метод должен создавать или обновлять данные сайта.
+Входящие параметры из данных сайта.
+Данные ответа идентификатор сайта. Пример: `{"success": true, data: {"id": 123}}`
+
+## Сохранить рекламное место
+Метод должен создавать или обновлять данные рекламного места.
+Входящие параметры из данных сайта.
+Данные ответа идентификатор сайта. Пример: `{"success": true, data: {"id": 123}}`
+
+## Запрос данных рекламного места
+Входящие параметры (должен присутствовать хотя бы один из параметров): 
+```
+{
+	"adUnitIds": [1,2,3],
+	"site": 12,
+	"userId": 1
+}
+```
+
+Данные ответа должны быть сформированы в формате adUnit для работы со скриптом prebid.js 
+([ad unit prebid](https://docs.prebid.org/dev-docs/publisher-api-reference.html#module_pbjs.addAdUnits), 
+[prebid basic example](https://docs.prebid.org/dev-docs/examples/basic-example.html)) и содержаться в параметре data. 
+Пример: `{"success": true, data: [...]}`
+
+----- скрипты -----
+CREATE TABLE ad_unit (
+    id          serial PRIMARY KEY
+    user_id     integer NOT NULL
+    site_id     integer NOT NULL
+    name        varchar(100)
+    code        varchar(100) UNIQUE
+    active      boolean
+    params      json
+    sizes       json
+    created_at  timestamp
+    updated_at  timestamp
+    deleted_at  timestamp
+);
+CREATE TABLE ad_unit (id serial PRIMARY KEY, user_id integer NOT NULL, site_id integer NOT NULL, name varchar(100), code varchar(100) UNIQUE, active boolean, params json, sizes json, created_at timestamp, updated_at timestamp,     deleted_at timestamp);
+
+INSERT INTO ad_unit(user_id, site_id, name, code, active, params, sizes, created_at, updated_at, deleted_at) VALUES (0,0,'x','x',true,'{"x": 0}','{"x": 0}', '2016-06-22 19:10:25-07', '2016-06-22 19:10:25-07', '2016-06-22 19:10:25-07');
+
+
+CREATE TABLE user (
+    id          serial PRIMARY KEY
+    username    varchar(100)
+    email       varchar(100)
+    active      boolean
+    created_at  timestamp
+    updated_at  timestamp
+    deleted_at  timestamp
+);
+
+CREATE TABLE site (
+    id          serial PRIMARY KEY
+    domain      varchar(100) UNIQUE
+    active      boolean
+    created_at  timestamp
+    updated_at  timestamp
+    deleted_at  timestamp
+);
+
+INSERT INTO site VALUES (0, '', true, '1980-01-01', '2016-06-22 19:10:25-07', '2016-06-22 19:10:25-07');
+INSERT INTO site(domain, active, created_at, deleted_at, updated_at) VALUES ('', true, '1980-01-01', '2016-06-22 19:10:25-07', '2016-06-22 19:10:25-07');
+INSERT INTO site VALUES ('', true, '1980-01-01', '2016-06-22 19:10:25-07', '2016-06-22 19:10:25-07');
+
+
+INSERT INTO site VALUES (0,'x',true,'1980-01-01', '2016-06-22 19:10:25-07', '2016-06-22 19:10:25-07') ON CONFLICT (id) DO UPDATE SET id = 0, domain = 'xxx', active=true, created_at = '2016-06-22 19:10:25-07', updated_at = '2016-06-22 19:10:25-07', deleted_at = '2016-06-22 19:10:25-07';
+INSERT INTO site VALUES (0,'x',true,'1980-01-01', '2016-06-22 19:10:25-07', '2016-06-22 19:10:25-07');
+INSERT INTO site(domain, active, created_at, updated_at, deleted_at) VALUES ('x',true,'1980-01-01', '2016-06-22 19:10:25-07', '2016-06-22 19:10:25-07');
+
+
+
+
+http://localhost:3000/ad_unit/{"adUnitIds": [0,1,2], "site": 12, "userId": 1}
+http://localhost:3000/ad_unit/{"user_id": 0,"site_id": 0,"name": "x", "code": "x", "active": true, "params": {"x": 0},"sizes": {"x": 0},"created_at": "2016-06-22 19:10:25-07", "updated_at": "2016-06-22 19:10:25-07", "deleted_at": null}
+http://localhost:3000/site/{"domain": "", "active": true, "created_at": "2016-06-22 19:10:25-07", "updated_at": "2016-06-22 19:10:25-07", "deleted_at": null}
