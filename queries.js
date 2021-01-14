@@ -10,6 +10,9 @@ const HTTP_status = {
 	ok: 200,
 	badRequest: 400
 }
+const HTTP_header = {
+	origin: 'Access-Control-Allow-Origin'
+}
 const caption = {
 	invalidJSON: 'Invalid JSON'
 }
@@ -22,13 +25,13 @@ async function getAdUnits(request, response) {
 		response.status(HTTP_status.badRequest).json(result);
 	}
 	await pool.query(query, (error, results) => {
-		if (true) {
+		if (error) {
 			let result = getFailedResult(['error']);
 			response.status(HTTP_status.badRequest).json(result);
 			return;
 		}
 		if (request.headers.origin){
-			response.setHeader('Access-Control-Allow-Origin', request.headers.origin);
+			response.setHeader(HTTP_header.origin, request.headers.origin);
 		}
 		let result = getResult(results.rows, []);
 		response.status(HTTP_status.ok).json(result);
@@ -55,7 +58,7 @@ async function createUpdateSite(request, response) {
 			return;
 		}
 		if (request.headers.origin){
-			response.setHeader('Access-Control-Allow-Origin', request.headers.origin);
+			response.setHeader(HTTP_header.origin, request.headers.origin);
 		}
 		let lastRow = await pool.query('SELECT id FROM site ORDER BY id DESC LIMIT 1');
 	    let result = getResult(lastRow.rows[0].id, []);
@@ -88,7 +91,7 @@ async function createUpdateAdUnit(request, response) {
 			return;
 		}
 		if (request.headers.origin){
-			response.setHeader('Access-Control-Allow-Origin', request.headers.origin);
+			response.setHeader(HTTP_header.origin, request.headers.origin);
 		}
 		let lastRow = await pool.query('SELECT id FROM ad_unit ORDER BY id DESC LIMIT 1');
 		let result = getResult(lastRow.rows[0].id, []);
@@ -101,18 +104,18 @@ function buildQuery(params) {
 	if (params.adUnitIds){
 		for (let id = 0; id < params.adUnitIds.length; id++){
 			if (id < params.adUnitIds.length){
-				let word = query.includes('WHERE') ? 'OR' : 'WHERE';
-				query += ` ${word} id = ${params.adUnitIds[id]}`;
+				let operator = query.includes('WHERE') ? 'OR' : 'WHERE';
+				query += ` ${operator} id = ${params.adUnitIds[id]}`;
 			}
 		}
 	}
 	if (params.site){
-		let word = query.includes('WHERE') ? 'AND' : 'WHERE';
-		query += ` ${word} site_id = ${params.site}`;
+		let operator = query.includes('WHERE') ? 'AND' : 'WHERE';
+		query += ` ${operator} site_id = ${params.site}`;
 	}
 	if (params.userId){
-		let word = query.includes('WHERE') ? 'AND' : 'WHERE';
-		query += ` ${word} user_id = ${params.userId}`;
+		let operator = query.includes('WHERE') ? 'AND' : 'WHERE';
+		query += ` ${operator} user_id = ${params.userId}`;
 	}
 	return `${query};`;
 }
